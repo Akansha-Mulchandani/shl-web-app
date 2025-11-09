@@ -147,3 +147,14 @@ Render setup:
 2) Set environment variable in Streamlit Cloud:
    - `API_BASE_URL` = `https://<your-render-service>.onrender.com`
 3) Deploy. Use the sidebar health check to confirm connectivity.
+
+### Frontend on Netlify (static alternative)
+
+- A static web UI is included under `/web` (index.html, app.js, styles.css). It calls the same FastAPI backend via `API_BASE_URL` you set in the page.
+- `netlify.toml` sets the publish directory to `web`.
+
+Deploy options:
+- Netlify → New site from Git → connect this repo → Build command: none → Publish directory: `web`.
+- Or Netlify Drop: zip the `web/` folder and drag-and-drop at https://app.netlify.com/drop.
+
+After deploy, open the site, set `API Base URL` to your Render URL, run a health check, and request recommendations.

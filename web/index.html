@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SHL Assessment Recommender</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h1>SHL Recommender</h1>
+      <label>API Base URL</label>
+      <input id="apiBase" type="text" placeholder="https://<your-render>.onrender.com" />
+      <button id="saveBase">Save</button>
+      <button id="healthBtn">Check Health</button>
+      <div id="healthStatus" class="muted"></div>
+      <div class="note">Base URL is stored in your browser only.</div>
+    </aside>
+    <main class="main">
+      <section class="card">
+        <h2>Get Recommendations</h2>
+        <label for="query">Query / Job Description</label>
+        <textarea id="query" rows="8" placeholder="Paste a JD or type a query..."></textarea>
+        <div class="row">
+          <label for="k">Top-k</label>
+          <input id="k" type="number" min="1" max="50" value="10" />
+          <button id="recommendBtn">Recommend</button>
+        </div>
+        <div id="error" class="error"></div>
+      </section>
+      <section class="card">
+        <div class="row between">
+          <h2>Results</h2>
+          <button id="downloadCsv">Download CSV</button>
+        </div>
+        <table id="results">
+          <thead>
+            <tr>
+              <th>URL</th>
+              <th>Test Type</th>
+              <th>Duration</th>
+              <th>Adaptive</th>
+              <th>Remote</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

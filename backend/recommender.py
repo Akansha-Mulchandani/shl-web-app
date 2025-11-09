@@ -34,8 +34,9 @@ class Recommendation:
 
 class Recommender:
     def __init__(self):
+        # Lazy init to keep memory low on Render free tier
         self.model_name = "sentence-transformers/all-MiniLM-L6-v2"
-        self.model = SentenceTransformer(self.model_name)
+        self.model = None  # type: Optional[SentenceTransformer]
         self.items = []  # list of dicts
         self.texts = []  # for encoding
         self.types = []  # test types
@@ -44,10 +45,8 @@ class Recommender:
         self.descs = []
         self.emb = None
         self.index = None
-        self._load_catalog()
-        self._build_index()
 
-    def _load_catalog(self):
+    def _load_catalog(self, limit: Optional[int] = None):
         self.items = []
         if os.path.exists(CATALOG_PATH):
             with open(CATALOG_PATH, 'r', encoding='utf-8') as f:
@@ -57,6 +56,8 @@ class Recommender:
                         if obj.get('category') == 'Pre-packaged Job Solutions':
                             continue
                         self.items.append(obj)
+                        if limit is not None and len(self.items) >= limit:
+                            break
                     except Exception:
                         continue
         self.texts = [
@@ -67,6 +68,19 @@ class Recommender:
         self.urls = [it.get('url') for it in self.items]
         self.names = [it.get('name') for it in self.items]
         self.descs = [it.get('description') for it in self.items]
+
+    def ensure_ready(self, limit: int = 800):
+        """
+        Lazily load the embedding model and build the index on first use.
+        Limit the catalog size to reduce memory usage on small instances.
+        """
+        if not self.items or not self.texts:
+            # cap items to avoid OOM
+            self._load_catalog(limit=limit)
+        if self.model is None:
+            self.model = SentenceTransformer(self.model_name)
+        if self.emb is None or (self.index is None and self.texts):
+            self._build_index()
 
     def _build_index(self):
         if not self.texts:
@@ -94,8 +108,9 @@ class Recommender:
         return D, I
 
     def recommend(self, query: str, k: int = 10) -> List[Recommendation]:
+        # Ensure model and index are ready (lazy init)
+        self.ensure_ready(limit=max(400, k * 50))
         if not self.items:
-            # cold start: no catalog yet
             return []
         q = self.model.encode([query], normalize_embeddings=True, convert_to_numpy=True)[0].astype('float32')
         D, I = self._knn(q, topk=max(30, k*3))

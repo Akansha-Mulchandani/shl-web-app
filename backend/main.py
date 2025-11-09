@@ -43,6 +43,16 @@ def health():
     return {"status": "healthy"}
 
 
+@app.get("/")
+def root():
+    return {
+        "name": "SHL Assessment Recommender API",
+        "docs": "/docs",
+        "health": "/health",
+        "recommend": "/recommend"
+    }
+
+
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
     query = req.query.strip()
